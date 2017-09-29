@@ -1,0 +1,19 @@
+{
+  "name": "timer",
+  "version": "1.0.0",
+  "description": "timer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "electron-toaster": "^2.0.4",
+    "node-notifier": "^5.1.2"
+  },
+  "private": true,
+  "devDependencies": {
+    "devtron": "^1.4.0"
+  }
+}

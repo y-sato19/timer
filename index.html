@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+	<meta charset="UTF-8">
+	<title>timer</title>
+	<script type="text/javascript" src="easytimer.js"></script>
+	<style>
+		button{
+			font-size: 18px;
+			line-height: 1.33;
+			padding: 10px 16px;
+			border-radius: 6px;
+		}
+		button#startButton{
+			color: rgb(255, 255, 255);
+	      background-color: rgb(92, 184, 92);
+	      border-color: rgb(76, 174, 76);
+	  }
+	  button#pauseButton{
+		  color: rgb(255, 255, 255);
+		  background-color: rgb(66, 139, 202);
+	     border-color: rgb(53, 126, 189);
+	  }
+	  button#stopButton{
+		  color: rgb(255, 255, 255);
+		  background-color: rgb(217, 83, 79);
+	     border-color: rgb(212, 63, 58);
+	  }
+	  button#resetButton{
+		  color: rgb(255, 255, 255);
+		  background-color: rgb(240, 173, 78);
+	     border-color: rgb(238, 162, 54);
+	  }
+	  #status{
+	  		font-size: 18px;
+			font-weight:bold;
+			color:rgb(222, 31, 31);
+	  }
+	  #timerHtml{
+	  		font-size:50px;
+	  }
+	</style>
+	<script type="text/javascript">
+		/**
+		 * [2017/09/25 タイマー]
+		 * @type {Date}
+		 */
+		window.onload = function(){
+			var ua = navigator.userAgent.toLowerCase();
+			console.log(ua);
+
+			//日付
+			var date = new Date();
+			const _date = document.getElementById('date');
+			const month = date.getMonth() + 1;
+			const dayOfWeek = date.getDay();
+			const dayOfWeekStr = [ "日", "月", "火", "水", "木", "金", "土" ][dayOfWeek];
+			_date.innerHTML= date.getFullYear() + "/" + month + "/" +  date.getDate() + "/" +  "（" + dayOfWeekStr +  "）";
+
+			var timerHtml = document.getElementById('timerHtml');
+			var statusHtml = document.getElementById('status');
+			// const audioPlay = document.getElementById('sound');
+
+			//timerライブラリをインスタンス
+			var timer = new Timer();
+
+			var start = document.getElementById('startButton');
+			var pause = document.getElementById('pauseButton');
+			var stop = document.getElementById('stopButton');
+			var reset = document.getElementById('resetButton');
+
+			start.addEventListener('click', timerFunc);
+			pause.addEventListener('click', pausefunc);
+			stop.addEventListener('click', stopfunc);
+			reset.addEventListener('click', resetfunc);
+
+			function pausefunc(){timer.pause();}
+			function stopfunc(){timer.stop();}
+			function resetfunc(){statusHtml.innerHTML = '';timer.reset();}
+
+
+			timer.addEventListener('started', function (e) {
+			    timerHtml.innerHTML = timer.getTimeValues().toString();
+			});
+			timer.addEventListener('reset', function (e) {
+				timerHtml.innerHTML = timer.getTimeValues().toString()
+			});
+
+			timer.addEventListener('secondsUpdated', function (e) {
+				timerHtml.innerHTML = timer.getTimeValues().toString();
+			});
+			timer.addEventListener('targetAchieved', function (e) {
+				var msg = {
+				    title : "時間ですよ！",
+				    message : "休憩しましょう",
+				   //  detail : "PI is equal to 3! - 0.0<br>PI is equal to 3! - 0.0<br>PI is equal to 3! - 0.0<br>PI is equal to 3! - 0.0<br>",
+				    width : 440,
+				    // height : 160, window will be autosized
+				    timeout : 6000,
+				    focus: true // set focus back to main window
+				};
+				ipc.send('electron-toaster-message', msg);
+				// notification();
+				statusHtml.innerHTML = '五分休憩';
+
+			});
+
+			//desktop通知用
+			var ipc = require("electron").ipcRenderer;
+
+			function timerFunc(){
+				//targetを設定することによって、完了時間をカウント
+				timer.start({precision: 'seconds', target: {seconds: 1500}});
+
+			}
+			function notification() {
+				 new Notification("Hello World");
+			}
+
+			function notifyMe() {
+			  // ブラウザが通知をサポートしているか確認する
+			  if (!("Notification" in window)) {
+			    alert("このブラウザはシステム通知をサポートしていません");
+			  }
+
+			  // すでに通知の許可を得ているか確認する
+			  else if (Notification.permission === "granted") {
+			    // 許可を得ている場合は、通知を作成する
+			    var notification = new Notification("Hi there!");
+			  }
+
+			  // 許可を得ていない場合は、ユーザに許可を求めなければならない
+			  else if (Notification.permission !== 'denied') {
+			    Notification.requestPermission(function (permission) {
+			      // ユーザが許可した場合は、通知を作成する
+			      if (permission === "granted") {
+			        var notification = new Notification("Hi there!");
+			      }
+			    });
+			  }
+		  }
+
+		}
+ 	</script>
+
+</head>
+<body>
+	<p id="date"></p>
+	<div id="chronoExample">
+	    <p id="timerHtml">00:00:00</p>
+	    <div>
+	        <button id="startButton">Start</button>
+	        <button id="pauseButton">Pause</button>
+	        <button id="stopButton">Stop</button>
+	        <button id="resetButton">Reset</button>
+	    </div>
+	</div>
+	<p id="status"></p>
+
+</body>
+</html>
